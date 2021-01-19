@@ -1,0 +1,60 @@
+{
+  "name": "vue-jenkins",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "vue-cli-service serve",
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "test:e2e": "vue-cli-service test:e2e",
+    "cypress": "cross-env NODE_ENV=prod vue-cli-service test:e2e",
+    "cover": "cross-env NODE_ENV=test vue-cli-service test:e2e",
+    "silent": "cross-env NODE_ENV=test vue-cli-service test:e2e --mode stage --headless",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "core-js": "3.6.5",
+    "vue": "2.6.12",
+    "vue-class-component": "7.2.6",
+    "vue-property-decorator": "8.5.1",
+    "vue-router": "3.4.7"
+  },
+  "devDependencies": {
+    "@cypress/code-coverage": "3.8.3",
+    "@istanbuljs/nyc-config-typescript": "1.0.1",
+    "@typescript-eslint/eslint-plugin": "2.34.0",
+    "@typescript-eslint/parser": "2.34.0",
+    "@vue/cli-plugin-babel": "4.5.8",
+    "@vue/cli-plugin-e2e-cypress": "4.5.8",
+    "@vue/cli-plugin-eslint": "4.5.8",
+    "@vue/cli-plugin-router": "4.5.8",
+    "@vue/cli-plugin-typescript": "4.5.8",
+    "@vue/cli-service": "4.5.8",
+    "@vue/eslint-config-typescript": "5.1.0",
+    "babel-plugin-istanbul": "6.0.0",
+    "cross-env": "7.0.2",
+    "eslint": "6.8.0",
+    "eslint-plugin-vue": "6.2.2",
+    "nyc": "15.1.0",
+    "source-map-support": "0.5.19",
+    "ts-node": "9.0.0",
+    "typescript": "3.9.7",
+    "vue-template-compiler": "2.6.12"
+  },
+  "nyc": {
+    "extends": "@istanbuljs/nyc-config-typescript",
+    "all": true,
+    "include": [
+      "src/**/*.{js,vue}"
+    ],
+    "extension": [
+      ".js",
+      ".vue"
+    ],
+    "reporter": [
+      "lcov",
+      "text",
+      "text-summary"
+    ]
+  }
+}

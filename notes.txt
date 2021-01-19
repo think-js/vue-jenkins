@@ -1,0 +1,325 @@
+
+--------------------------------
+node 12.19.0
+vue 4.5.8
+--------------------------------
+
+node -v
+v11.9.0                nvm use 12.19.0
+npm -v
+6.5.0                   6.14.8      
+vue --version
+@vue/cli 4.5.7          4.5.8
+
+    (if needed, install vue cli globally)
+npm install -g @vue/cli@4.5.7
+    or
+npm install -g @vue/cli@4.5.8
+
+Cypress 3.8.3
+
+vue create hello-world
+    (choose manually - app options: typescript, etc - e2e would not check)
+
+npm run serve
+
+  (git init   - is already done by vue cli)
+  (beware of hidden .git in parent)
+
+vue add e2e-cypress
+
+  (run it - a script in package.json - vue-cli-service test:e2e)
+
+npm run test:e2e
+****************
+
+npm i -D @cypress/code-coverage
+
+  edit files to load the code-coverage plugin
+
+//--------------------------------------------------------
+// file tests/e2e/support/index.js (add to top of file)
+import '@cypress/code-coverage/support'
+
+//--------------------------------------------------------
+// file tests/e2e/plugins/index.js
+module.exports = (on, config) => {
+  require('@cypress/code-coverage/task')(on, config)
+  // IMPORTANT to return the config object
+  // with the any changed environment variables
+  //. return config
+
+
+  return Object.assign({}, config, {
+    fixturesFolder: 'tests/e2e/fixtures',
+    integrationFolder: 'tests/e2e/specs',
+    screenshotsFolder: 'tests/e2e/screenshots',
+    videosFolder: 'tests/e2e/videos',
+    supportFile: 'tests/e2e/support/index.js'
+  })
+
+
+
+}
+//--------------------------------------------------------
+
+Instrument the code
+===================
+  install istanbul by installing nyc
+    (the line below creates instrument folder - no change to package.json so skip nyc below?)
+           npx nyc instrument --compact=false src instrumented
+npm install --save-dev nyc
+
+npm install --save-dev babel-plugin-istanbul
+*********************
+// babel.config.js - presets are already there, add plugins
+const plugins = []
+if (process.env.NODE_ENV === 'test') {
+  plugins.push([
+    "babel-plugin-istanbul", {
+      // specify some options for NYC instrumentation here
+      // like tell it to instrument both JavaScript and Vue files
+      extension: ['.js', '.vue'],
+    }
+  ])
+}
+module.exports = {
+  presets: [
+    '@vue/cli-plugin-babel/preset'
+  ],
+  plugins
+}
+
+----------------------------------------
+npm install --save-dev cross-env
+
+  add a script to package.json to use: cross-env NODE_ENV=test
+    maybe??
+      "test": "cross-env NODE_ENV=test nyc --reporter=lcov --reporter=text mocha test/*.js"
+    or
+      "cover": "cross-env NODE_ENV=test vue-cli-service test:e2e",
+    mac/linux only:
+      "cypress": "NODE_ENV=prod vue-cli-service test:e2e",
+      "cover": "NODE_ENV=test vue-cli-service test:e2e"
+ 
+
+Use Chrome Inspect - Console - to confirm Coverage
+ You should see the window.__coverage__ object in the "Application under test iframe"
+
+=====================================================
+1) update package.json in vue-ts-app   (from hello-world)
+	(rename package-lock.json for rebuild - unless project requires it for old portions??)
+	package.json
+		scripts must use cross-env
+			use new scripts:
+				cypress
+				cover
+		* project runs locally, just make sure cypress only runs the server currectly
+
+	tests folder - consider moving the existing tests to here <————————
+	tests/e2e/support/index.js
+	tests/e2e/plugins/index.js
+	babel.config.js
+
+
+
+2) delete node_modules - npm install
+
+
+3) use tests folder
+
+
+4) prove vue-ts-app has coverage working (on mac, using node 11.9.0)
+    components HelloWorld.vue
+    views Home.vue
+
+    not used:
+    views About.vue
+    App.vue - used but not tested
+
+4a) Add tests and .vue components (used and unused) - to test if included in coverage
+    try "all"
+++++++++ all ********
+babel.config.js
+===============
+const plugins = []
+if (process.env.NODE_ENV === 'test') {
+  plugins.push([
+    "babel-plugin-istanbul", {
+      // specify some options for NYC instrumentation here
+      // like tell it to instrument both JavaScript and Vue files
+      extension: ['.js', '.vue'],
+      all: true,
+      "include": ["src/**/*.js"],
+  //.    "exclude": ["app/util.js"],
+    }
+  ])
+}
+module.exports = {
+  presets: [
+    '@vue/cli-plugin-babel/preset'
+  ],
+  plugins
+}
+
+See nyc configuration and include and exclude options. You can include and exclude files using minimatch patterns in .nycrc file or using "nyc" target="_blank" object inside your package.json file.
+
+For example, if you want to only include files in the app folder, but exclude app/util.js file, you can set in your package.json
+
+{
+  "nyc": {
+    "include": ["app/**/*.js"],
+    "exclude": ["app/util.js"]
+  }
+}
+Note: if you have all: true NYC option set, this plugin will check the produced .nyc_output/out.json before generating the final report. If the out.json file does not have information for some files that should be there according to include list, then an empty placeholder will be included, see PR 208.
+
+Another important option is excludeAfterRemap. By default it is false, which might let excluded files through. If you are excluding the files, and the instrumenter does not respect the nyc.exclude setting, then add excludeAfterRemap: true to tell nyc report to exclude files. See examples/exclude-files.
+*********************
+
+5) prove vue-ts-app has coverage working (on mac, using node 12.19.0  with npm 6.14.8)
+
+
+
+6) create minimal vue-ts-app for windows install (may need optional fsevents - not avail on win)
+	copy to win
+6a) move these notes to note.txt
+
+7) windows environment setup
+
+node -v
+v12.19.0
+npm -v
+6.14.8
+vue —version
+@vue/cli 4.5.7
+
+(update windows global to these versions)
+beware of project with old local vue/cli - we will know by checking: vue - - version in local terminal
+
+8) In windows, vue-ts-app, npm install
+
+	npm run serve                          (or npm start - if script added)
+	npm run cover
+		*** does it work?
+
+9) Add tests and .vue components (used and unused) - to test if included in coverage
+
+
+
+10) coverage headless mode
+
+——————
+Can we npm update to pickup changes to package.json?
+
+——————
+11a) project: po-enterprise-common-code-coverage
+	check that it runs locally
+	do we need login?
+
+11) project: po-enterprise-common-code-coverage - update (del node_modules) package.json, tests folder, npm 12.19.0 - npm  install ) 
+	package.json
+		scripts must use cross-env
+			use new scripts:
+				cypress
+				cover
+		* project runs locally, just make sure cypress only runs the server currectly
+
+	tests folder - consider moving the existing tests to here <————————
+	tests/e2e/support/index.js
+	file tests/e2e/plugins/index.js
+	babel.config.js
+
+12) just run server locally after new npm install: po-enterprise-common-code-coverage
+	confirm running - before any cypress or coverage test
+
+13) 8) In windows, po-enterprise-common-code-coverage, npm install
+
+	npm run serve                          (or npm start - if script added)
+	npm run cover
+		*** does it work?
+
+fsevent 1.2.13 will fail with node 14
+what is vue-cli version? 4.5.7 
+
+
+==============================================================
+npm i -D @istanbuljs/nyc-config-typescript source-map-support ts-node
+
+maybe all we need is package.json nyc config (extension may not matter)
+
+  "nyc": {
+    "extends": "@istanbuljs/nyc-config-typescript",
+    "all": true,
+    "include": ["src/**/*.vue"],
+    "extension": [".js", ".vue", ".ts", ".tsx"]
+
+  }
+--------------
+  use
+    package.json
+      "nyc": {
+
+      }
+  or use
+    .nycrc.json
+
+  or nyc.config.js
+
+--reporter=html
+--reporter=text
+
+--reporter=lcov
+--reporter=text-summary
+
+    "extends": "@istanbuljs/nyc-config-typescript",
+    "all": true,
+    "include": [
+      "src/**/*.vue"
+    ]
+
+(((((((((((((((((((())))))))))))))))))))
+// package.json
+// ...
+  "nyc": {
+    "check-coverage": true,
+    "per-file": true,
+    "lines": 90,
+    "statements": 90,
+    "functions": 90,
+    "branches": 90,
+    "include": [
+      "apollo-server/**/*.js",
+      "src/**/*.{js,vue}"
+    ],
+    "exclude": [
+      "apollo-server/*.js",
+      "src/*.js",
+    ],
+    "reporter": [
+      "lcov",
+      "text",
+      "text-summary"
+    ],
+    "extension": [
+      ".js"
+    ],
+    "cache": true,
+    "all": true
+  }
+  ((((((((((((((()))))))))))))))
+
+
+    "nyc": {
+    "extends": "@istanbuljs/nyc-config-typescript",
+    "all": true,
+    "include": [
+      "src/**/*.vue"
+    ],
+    "reporter": [
+      "lcov",
+      "text",
+      "text-summary"
+    ]
+  }
+
